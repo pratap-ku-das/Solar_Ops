@@ -25,20 +25,36 @@ const seed = async () => {
     Invoice.deleteMany({})
   ]);
 
-  const users = await User.insertMany(demoUsers);
-  const customers = await Customer.insertMany(demoCustomers);
+  const users = [];
+  for (const demoUser of demoUsers) {
+    const { _id, ...userData } = demoUser;
+    const user = await User.create({ ...userData, isActive: true });
+    users.push(user);
+  }
+
+  const customers = await Customer.insertMany(
+    demoCustomers.map(({ _id, ...customer }) => customer)
+  );
 
   const customerMap = new Map(customers.map((customer, index) => [demoCustomers[index]._id, customer._id]));
 
-  const projectsToInsert = demoProjects.map((project) => ({
+  const projectsToInsert = demoProjects.map(({ _id, documents = [], ...project }) => ({
     ...project,
-    customerId: customerMap.get(project.customerId)
+    customerId: customerMap.get(project.customerId),
+    documents: documents.map(({ type, fileName, path }) => ({ type, fileName, path }))
   }));
 
-  await Project.insertMany(projectsToInsert);
-  await Expense.insertMany(demoExpenses);
-  await Stock.insertMany(demoStock);
-  await Invoice.insertMany(demoInvoices);
+  const insertedProjects = await Project.insertMany(projectsToInsert);
+  const projectMap = new Map(insertedProjects.map((project, index) => [demoProjects[index]._id, project._id]));
+
+  await Expense.insertMany(
+    demoExpenses.map(({ _id, ...expense }) => ({
+      ...expense,
+      projectId: projectMap.get(expense.projectId)
+    }))
+  );
+  await Stock.insertMany(demoStock.map(({ _id, ...item }) => item));
+  await Invoice.insertMany(demoInvoices.map(({ _id, ...invoice }) => invoice));
 
   console.log(`Seed complete: ${users.length} users, ${customers.length} customers inserted.`);
   process.exit(0);

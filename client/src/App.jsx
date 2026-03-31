@@ -10,6 +10,7 @@ import StockPage from "./pages/StockPage";
 import ExpensesPage from "./pages/ExpensesPage";
 import InvoicesPage from "./pages/InvoicesPage";
 import SettingsPage from "./pages/SettingsPage";
+import UsersPage from "./pages/UsersPage";
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
             <Route path="/stock" element={<StockPage />} />
             <Route path="/expenses" element={<ExpensesPage />} />
             <Route path="/invoices" element={<InvoicesPage />} />
+            <Route path="/team" element={<UsersPage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Route>
         </Route>

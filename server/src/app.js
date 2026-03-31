@@ -10,6 +10,8 @@ const customerRoutes = require("./routes/customerRoutes");
 const expenseRoutes = require("./routes/expenseRoutes");
 const stockRoutes = require("./routes/stockRoutes");
 const invoiceRoutes = require("./routes/invoiceRoutes");
+const userRoutes = require("./routes/userRoutes");
+const systemRoutes = require("./routes/systemRoutes");
 
 const app = express();
 const clientDistPath = path.join(__dirname, "../../client/dist");
@@ -32,6 +34,8 @@ app.use("/api/customers", customerRoutes);
 app.use("/api/expenses", expenseRoutes);
 app.use("/api/stock", stockRoutes);
 app.use("/api/invoices", invoiceRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/system", systemRoutes);
 
 if (isProduction) {
   app.use(express.static(clientDistPath));

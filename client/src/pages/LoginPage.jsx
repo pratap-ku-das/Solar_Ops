@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-const demoAccounts = [
+const starterAccounts = [
   { role: "Admin", email: "admin@solar.com", password: "admin123" },
   { role: "Operations", email: "ops@solar.com", password: "ops123" },
   { role: "BDM", email: "bdm@solar.com", password: "bdm123" }
@@ -41,31 +41,37 @@ export default function LoginPage() {
       <div className="grid w-full max-w-5xl gap-6 lg:grid-cols-2">
         <div className="rounded-3xl bg-slate-900 p-8 text-white shadow-xl">
           <p className="text-sm uppercase tracking-[0.35em] text-brand-400">Solar PM</p>
-          <h1 className="mt-3 text-4xl font-bold">Manage solar projects from lead to subsidy.</h1>
+          <h1 className="mt-3 text-4xl font-bold">Company-ready solar operations, from lead to subsidy.</h1>
           <p className="mt-4 text-slate-300">
-            One platform for workflow automation, inventory, expenses, document management, and installation scheduling.
+            Manage customer onboarding, workflow stages, documents, inventory, expenses, invoices, and team access in one secure platform.
           </p>
 
-          <div className="mt-6 space-y-3">
-            {demoAccounts.map((account) => (
+          <div className="mt-6 rounded-2xl border border-slate-700 bg-slate-800/60 p-4 text-sm text-slate-200">
+            <p className="font-semibold text-white">Starter access</p>
+            <p className="mt-1 text-slate-300">Use these only for initial setup and change passwords after your first company login.</p>
+          </div>
+
+          <div className="mt-4 space-y-3">
+            {starterAccounts.map((account) => (
               <button
                 key={account.role}
                 type="button"
                 onClick={() => setForm((prev) => ({ ...prev, email: account.email, password: account.password }))}
                 className="flex w-full items-center justify-between rounded-2xl border border-slate-700 px-4 py-3 text-left hover:bg-slate-800"
               >
-                <span>{account.role} Demo</span>
-                <span className="text-xs text-slate-400">Use account</span>
+                <span>{account.role} Starter</span>
+                <span className="text-xs text-slate-400">Fill credentials</span>
               </button>
             ))}
           </div>
         </div>
 
         <div className="card self-center p-8">
-          <div className="mb-6 flex gap-2">
+          <div className="mb-3 flex gap-2">
             <button onClick={() => setMode("login")} className={mode === "login" ? "btn-primary" : "btn-secondary"}>Login</button>
-            <button onClick={() => setMode("register")} className={mode === "register" ? "btn-primary" : "btn-secondary"}>Register</button>
+            <button onClick={() => setMode("register")} className={mode === "register" ? "btn-primary" : "btn-secondary"}>Initial Setup</button>
           </div>
+          <p className="mb-6 text-sm text-slate-500">After the first admin signs in, create all future staff accounts from the `Team` page.</p>
 
           <form className="space-y-4" onSubmit={handleSubmit}>
             {mode === "register" && (

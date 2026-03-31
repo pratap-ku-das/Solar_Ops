@@ -1,4 +1,4 @@
-import { BarChart3, Boxes, FileText, LayoutDashboard, Settings, Users, Wallet } from "lucide-react";
+import { BarChart3, Boxes, FileText, LayoutDashboard, Settings, ShieldCheck, Users, Wallet } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 const navItems = [
@@ -8,6 +8,7 @@ const navItems = [
   { to: "/stock", label: "Stock", icon: Boxes },
   { to: "/expenses", label: "Expenses", icon: Wallet },
   { to: "/invoices", label: "Invoices", icon: FileText },
+  { to: "/team", label: "Team", icon: ShieldCheck },
   { to: "/settings", label: "Settings", icon: Settings }
 ];
 
