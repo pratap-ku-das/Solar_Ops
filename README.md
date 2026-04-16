@@ -24,7 +24,14 @@ npm install --prefix client
 npm run dev
 ```
 
-The app runs in **demo mode** without MongoDB if `MONGO_URI` is not configured. Add `server/.env` from `server/.env.example` to enable persistent MongoDB storage.
+Then open:
+- Client: `http://localhost:5173`
+- API health: `http://localhost:5000/api/health`
+
+> `.env` is a configuration file and is **not** executable.  
+> If you want persistent MongoDB storage, create `server/.env` from `server/.env.example`.
+
+The app runs in **demo mode** without MongoDB if `MONGO_URI` is not configured.
 
 ## Key Features
 - Multi-role dashboards for **Admin**, **Operations**, and **BDM**
