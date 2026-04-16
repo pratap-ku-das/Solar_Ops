@@ -27,7 +27,10 @@ export default function ProjectsPage() {
   const [projects, setProjects] = useState([]);
   const [stages, setStages] = useState([]);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  // For global filter dropdown
+  const [statusFilterGlobal, setStatusFilterGlobal] = useState("");
+  // For per-project status editing
+  const [statusEdit, setStatusEdit] = useState({});
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(initialForm);
   const [scheduleMap, setScheduleMap] = useState({});
@@ -38,7 +41,7 @@ export default function ProjectsPage() {
 
   const fetchProjects = async () => {
     const { data } = await api.get("/projects", {
-      params: { search, status: statusFilter }
+      params: { search, status: statusFilterGlobal }
     });
     setProjects(data);
   };
@@ -56,10 +59,10 @@ export default function ProjectsPage() {
         [project.customerName, project.name, project.mobileNumber, project.consumerNumber]
           .filter(Boolean)
           .some((value) => String(value).toLowerCase().includes(query));
-      const matchesStatus = !statusFilter || project.status === statusFilter;
+      const matchesStatus = !statusFilterGlobal || project.status === statusFilterGlobal;
       return matchesSearch && matchesStatus;
     });
-  }, [projects, search, statusFilter]);
+  }, [projects, search, statusFilterGlobal]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -69,7 +72,6 @@ export default function ProjectsPage() {
   const handleCreateProject = async (event) => {
     event.preventDefault();
     await api.post("/projects", form);
-    setForm(initialForm);
     setShowForm(false);
     setNotice("Project added successfully.");
     fetchProjects();
@@ -78,7 +80,6 @@ export default function ProjectsPage() {
   const updateStatus = async (projectId, status) => {
     await api.put(`/projects/${projectId}/status`, { status });
     setNotice("Project stage updated.");
-    fetchProjects();
   };
 
   const updateSchedule = async (projectId) => {
@@ -96,16 +97,16 @@ export default function ProjectsPage() {
       return;
     }
 
-    const formData = new FormData();
+        const matchesStatus = !statusFilterGlobal || project.status === statusFilterGlobal;
     formData.append("type", current.type || "General Document");
     formData.append("file", current.file);
 
     await api.post(`/projects/${projectId}/documents`, formData);
     setNotice("Document uploaded successfully.");
-    setUploadState((prev) => ({ ...prev, [projectId]: { type: "Aadhaar", file: null } }));
+      const status = statusEdit[projectId];
     fetchProjects();
   };
-
+      setStatusEdit(prev => ({ ...prev, [projectId]: undefined }));
   const exportCsv = async () => {
     const response = await api.get("/projects/export/csv", { responseType: "blob" });
     const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -114,15 +115,24 @@ export default function ProjectsPage() {
     link.setAttribute("download", "projects.csv");
     document.body.appendChild(link);
     link.click();
-    link.remove();
+          <select className="input" value={statusFilterGlobal} onChange={(e) => setStatusFilterGlobal(e.target.value)}>
+  };
+
+  // Add local state for status dropdowns
+  // (Already defined at the top: statusEdit, setStatusEdit)
+  const handleSaveStatus = async (projectId) => {
+    const status = statusEdit[projectId];
+    if (!status || status === projects.find(p => p._id === projectId)?.status) return;
+    await updateStatus(projectId, status);
+    setStatusEdit(prev => ({ ...prev, [projectId]: undefined }));
   };
 
   return (
-    <div className="space-y-6">
-      <PipelineBoard stages={stages} projects={projects} />
-
-      <div className="card">
-        <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                  <select
+                    className="input"
+                    value={statusEdit[project._id] !== undefined ? statusEdit[project._id] : project.status}
+                    onChange={e => setStatusEdit(prev => ({ ...prev, [project._id]: e.target.value }))}
+                  >
           <div>
             <h3 className="text-lg font-semibold">Projects</h3>
             <p className="text-sm text-slate-500">Manage customer jobs, subsidy stages, documents, and installation schedules.</p>
@@ -181,7 +191,7 @@ export default function ProjectsPage() {
 
         <div className="mb-4 grid gap-3 md:grid-cols-3">
           <input className="input" placeholder="Search by customer, mobile, or consumer number" value={search} onChange={(e) => setSearch(e.target.value)} />
-          <select className="input" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+          <select className="input" value={statusFilterGlobal} onChange={(e) => setStatusFilterGlobal(e.target.value)}>
             <option value="">All Statuses</option>
             {stages.map((stage) => (
               <option key={stage} value={stage}>{stage}</option>
@@ -202,7 +212,7 @@ export default function ProjectsPage() {
                     <span className="badge bg-emerald-100 text-emerald-700">₹{Number(project.projectCost || 0).toLocaleString("en-IN")}</span>
                   </div>
                   <p className="mt-1 text-sm text-slate-500">{project.discom} • {project.mobileNumber} • {project.address}</p>
-                  <p className="mt-2 text-sm text-slate-600">Panel: {project.panelBrand || "-"} | Inverter: {project.inverterBrand || "-"} | Consumer No: {project.consumerNumber || "-"} | Lead By: {project.leadBy || "-"}</p>
+                  <p className="mt-2 break-words text-sm text-slate-600">Panel: {project.panelBrand || "-"} | Inverter: {project.inverterBrand || "-"} | Consumer No: {project.consumerNumber || "-"} | Lead By: {project.leadBy || "-"}</p>
 
                   <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-500">
                     {(project.documents || []).map((doc) => (
@@ -212,7 +222,7 @@ export default function ProjectsPage() {
                     ))}
                   </div>
 
-                  <div className="mt-4 grid gap-2 rounded-2xl bg-slate-50 p-3 md:grid-cols-[160px_1fr_auto]">
+                  <div className="mt-4 grid gap-2 rounded-2xl bg-slate-50 p-3 sm:grid-cols-[140px_minmax(0,1fr)_auto]">
                     <select
                       className="input"
                       value={uploadState[project._id]?.type || "Aadhaar"}
@@ -226,23 +236,36 @@ export default function ProjectsPage() {
                       ))}
                     </select>
                     <input
-                      className="input"
+                      className="input min-w-0"
                       type="file"
                       onChange={(e) => setUploadState((prev) => ({
                         ...prev,
                         [project._id]: { ...(prev[project._id] || {}), type: prev[project._id]?.type || "Aadhaar", file: e.target.files?.[0] || null }
                       }))}
                     />
-                    <button onClick={() => uploadDocument(project._id)} className="btn-secondary">Upload Document</button>
+                    <button onClick={() => uploadDocument(project._id)} className="btn-secondary w-full sm:w-auto">Upload Document</button>
                   </div>
                 </div>
 
-                <div className="grid gap-2 md:min-w-80">
-                  <select className="input" value={project.status} onChange={(e) => updateStatus(project._id, e.target.value)}>
-                    {stages.map((stage) => (
-                      <option key={stage} value={stage}>{stage}</option>
-                    ))}
-                  </select>
+                <div className="grid w-full gap-2 xl:w-80 xl:min-w-[20rem]">
+                  <div className="flex items-center gap-2">
+                    <select
+                      className="input"
+                      value={statusEdit[project._id] !== undefined ? statusEdit[project._id] : project.status}
+                      onChange={e => setStatusEdit(prev => ({ ...prev, [project._id]: e.target.value }))}
+                    >
+                      {stages.map((stage) => (
+                        <option key={stage} value={stage}>{stage}</option>
+                      ))}
+                    </select>
+                    <button
+                      className="btn-secondary"
+                      onClick={() => handleSaveStatus(project._id)}
+                      disabled={statusEdit[project._id] === undefined || statusEdit[project._id] === project.status}
+                    >
+                      Save
+                    </button>
+                  </div>
                   <div className="grid gap-2 sm:grid-cols-2">
                     <input
                       type="date"

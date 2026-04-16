@@ -14,10 +14,10 @@ const navItems = [
 
 export default function Sidebar() {
   return (
-    <aside className="w-full bg-slate-900 text-white lg:min-h-screen lg:w-64">
+    <aside className="w-full border-r border-slate-800/80 bg-slate-950/95 text-white backdrop-blur-xl lg:min-h-screen lg:w-64">
       <div className="border-b border-slate-800 p-5">
-        <p className="text-xs uppercase tracking-[0.25em] text-brand-500">Solar CRM</p>
-        <h1 className="mt-2 text-xl font-bold">Project Manager</h1>
+        <p className="text-xs uppercase tracking-[0.25em] text-brand-500">SolarOps</p>
+        <h1 className="mt-2 text-xl font-bold text-white/95">Project Manager</h1>
       </div>
 
       <nav className="space-y-1 p-4">
@@ -27,7 +27,9 @@ export default function Sidebar() {
             to={to}
             className={({ isActive }) =>
               `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition ${
-                isActive ? "bg-brand-600 text-white" : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                isActive
+                  ? "bg-gradient-to-r from-brand-500 to-brand-600 text-white shadow-lg shadow-brand-700/30"
+                  : "text-slate-300 hover:bg-slate-800/90 hover:text-white"
               }`
             }
           >

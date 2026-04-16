@@ -5,8 +5,21 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
+    const token = localStorage.getItem("solarToken");
     const stored = localStorage.getItem("solarUser");
-    return stored ? JSON.parse(stored) : null;
+    if (!token || !stored) {
+      localStorage.removeItem("solarToken");
+      localStorage.removeItem("solarUser");
+      return null;
+    }
+
+    try {
+      return JSON.parse(stored);
+    } catch (error) {
+      localStorage.removeItem("solarToken");
+      localStorage.removeItem("solarUser");
+      return null;
+    }
   });
   const [loading, setLoading] = useState(false);
 

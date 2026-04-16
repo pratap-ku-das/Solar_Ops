@@ -12,6 +12,7 @@ const stockRoutes = require("./routes/stockRoutes");
 const invoiceRoutes = require("./routes/invoiceRoutes");
 const userRoutes = require("./routes/userRoutes");
 const systemRoutes = require("./routes/systemRoutes");
+const whatsappRoutes = require("./routes/whatsappRoutes");
 
 const app = express();
 const clientDistPath = path.join(__dirname, "../../client/dist");
@@ -36,6 +37,7 @@ app.use("/api/stock", stockRoutes);
 app.use("/api/invoices", invoiceRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/system", systemRoutes);
+app.use("/api/whatsapp", whatsappRoutes);
 
 if (isProduction) {
   app.use(express.static(clientDistPath));

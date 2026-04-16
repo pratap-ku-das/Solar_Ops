@@ -1,3 +1,4 @@
+
 const express = require("express");
 const mongoose = require("mongoose");
 const multer = require("multer");
@@ -10,6 +11,23 @@ const { sendReminderEmail } = require("../utils/emailService");
 const { PIPELINE_STAGES, demoProjects, demoCustomers, createId } = require("../data/sampleData");
 
 const router = express.Router();
+
+// Edit project details
+router.put("/:id", protect, authorize("admin", "operations", "bdm"), async (req, res) => {
+  const projectId = req.params.id;
+  const update = req.body;
+
+  if (mongoose.connection.readyState === 1) {
+    const project = await Project.findByIdAndUpdate(projectId, update, { new: true });
+    if (!project) return res.status(404).json({ message: "Project not found." });
+    return res.json(project);
+  }
+
+  const idx = demoProjects.findIndex((p) => String(p._id) === String(projectId));
+  if (idx === -1) return res.status(404).json({ message: "Project not found." });
+  demoProjects[idx] = { ...demoProjects[idx], ...update };
+  res.json(demoProjects[idx]);
+});
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, path.join(__dirname, "../../uploads")),
@@ -130,17 +148,45 @@ router.put("/:id/status", protect, authorize("admin", "operations", "bdm"), asyn
     return res.status(400).json({ message: "Invalid pipeline stage." });
   }
 
+  const { sendWhatsApp } = require("../utils/whatsappService");
+  let project;
   if (mongoose.connection.readyState === 1) {
-    const project = await Project.findByIdAndUpdate(req.params.id, { status }, { new: true });
+    project = await Project.findByIdAndUpdate(req.params.id, { status }, { new: true });
     if (!project) return res.status(404).json({ message: "Project not found." });
-    return res.json(project);
+  } else {
+    project = demoProjects.find((item) => String(item._id) === String(req.params.id));
+    if (!project) return res.status(404).json({ message: "Project not found." });
+    project.status = status;
   }
 
-  const project = demoProjects.find((item) => String(item._id) === String(req.params.id));
-  if (!project) return res.status(404).json({ message: "Project not found." });
+  // WhatsApp notification logic
+  try {
+    const customerNumber = project.mobileNumber || project.customerMobile || null;
+    if (customerNumber) {
+      const msg = `Dear ${project.customerName}, your solar project \"${project.name}\" has moved to stage: ${status}. Thank you for choosing us!`;
+      await sendWhatsApp({ to: customerNumber, message: msg });
+    }
+  } catch (err) {
+    console.error("WhatsApp notification failed:", err.message);
+  }
 
-  project.status = status;
   res.json(project);
+});
+
+router.delete("/:id", protect, authorize("admin", "operations", "bdm"), async (req, res) => {
+  const projectId = req.params.id;
+
+  if (mongoose.connection.readyState === 1) {
+    const project = await Project.findByIdAndDelete(projectId);
+    if (!project) return res.status(404).json({ message: "Project not found." });
+    return res.json({ message: "Project deleted." });
+  }
+
+  const projectIndex = demoProjects.findIndex((item) => String(item._id) === String(projectId));
+  if (projectIndex === -1) return res.status(404).json({ message: "Project not found." });
+
+  demoProjects.splice(projectIndex, 1);
+  res.json({ message: "Project deleted from demo data." });
 });
 
 router.post("/:id/schedule", protect, authorize("admin", "operations"), async (req, res) => {

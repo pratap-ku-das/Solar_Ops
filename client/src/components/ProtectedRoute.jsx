@@ -3,8 +3,9 @@ import { useAuth } from "../context/AuthContext";
 
 export default function ProtectedRoute({ allowedRoles }) {
   const { user } = useAuth();
+  const token = localStorage.getItem("solarToken");
 
-  if (!user) {
+  if (!user || !token) {
     return <Navigate to="/login" replace />;
   }
 

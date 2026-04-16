@@ -14,7 +14,7 @@ export default function PipelineBoard({ stages = [], projects = [] }) {
   }, {});
 
   return (
-    <div className="card overflow-x-auto">
+    <div className="card">
       <div className="mb-4 flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold text-slate-900">Project Pipeline</h3>
@@ -22,9 +22,9 @@ export default function PipelineBoard({ stages = [], projects = [] }) {
         </div>
       </div>
 
-      <div className="flex min-w-max gap-3 pb-1">
+      <div className="grid grid-cols-1 gap-3 pb-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
         {stages.map((stage) => (
-          <div key={stage} className="w-48 rounded-2xl border border-slate-200 bg-slate-50 p-3">
+          <div key={stage} className="min-w-0 rounded-2xl border border-slate-200 bg-slate-50 p-3">
             <span className={`badge ${stageColors[stage] || "bg-violet-100 text-violet-700"}`}>{stage}</span>
             <p className="mt-4 text-2xl font-bold text-slate-900">{counts[stage] || 0}</p>
             <p className="text-xs text-slate-500">projects in stage</p>
