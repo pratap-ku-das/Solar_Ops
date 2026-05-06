@@ -22,4 +22,52 @@ router.post("/", protect, authorize("admin", "bdm"), async (req, res) => {
   res.status(201).json(customer);
 });
 
+
+// Get customer details, documents, and projects by customer ID
+const Document = require("../models/Document");
+const Project = require("../models/Project");
+
+router.get("/:id/details", protect, async (req, res) => {
+  try {
+    const { id } = req.params;
+    let customer, documents, projects;
+    if (mongoose.connection.readyState === 1) {
+      customer = await Customer.findById(id);
+      documents = await Document.find({ customerId: id });
+      projects = await Project.find({ customerId: id });
+    } else {
+      // Demo mode: find in-memory
+      customer = demoCustomers.find((c) => c._id === id);
+      documents = [];
+      projects = [];
+    }
+    res.json({ customer, documents, projects });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch customer details" });
+  }
+});
+
+
+// Update customer details by ID
+router.put("/:id", protect, authorize("admin", "bdm"), async (req, res) => {
+  try {
+    const { id } = req.params;
+    let updatedCustomer;
+    if (mongoose.connection.readyState === 1) {
+      updatedCustomer = await Customer.findByIdAndUpdate(id, req.body, { new: true });
+    } else {
+      // Demo mode: update in-memory
+      const idx = demoCustomers.findIndex((c) => c._id === id);
+      if (idx !== -1) {
+        demoCustomers[idx] = { ...demoCustomers[idx], ...req.body };
+        updatedCustomer = demoCustomers[idx];
+      }
+    }
+    if (!updatedCustomer) return res.status(404).json({ error: "Customer not found" });
+    res.json(updatedCustomer);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to update customer" });
+  }
+});
+
 module.exports = router;

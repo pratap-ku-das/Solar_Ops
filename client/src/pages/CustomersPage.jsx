@@ -1,36 +1,82 @@
 import { useEffect, useState } from "react";
 import api from "../api/api";
+import PipelineSteps from "../components/PipelineSteps";
 
-export default function CustomersPage() {
+function CustomersPage() {
   const [customers, setCustomers] = useState([]);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [customerDetails, setCustomerDetails] = useState(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [loadingDetails, setLoadingDetails] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [editData, setEditData] = useState(null);
 
   useEffect(() => {
     api.get("/customers").then((response) => setCustomers(response.data));
   }, []);
 
+  const handleCustomerClick = async (customer) => {
+    setSelectedCustomer(customer);
+    setDetailsOpen(true);
+    setLoadingDetails(true);
+    setEditMode(false);
+    setEditData(null);
+    try {
+      const res = await api.get(`/customers/${customer._id}/details`);
+      setCustomerDetails(res.data);
+    } catch (err) {
+      setCustomerDetails({ error: "Failed to load details" });
+    }
+    setLoadingDetails(false);
+  };
+
+  const handleEdit = () => {
+    setEditMode(true);
+    setEditData({ ...customerDetails.customer });
+  };
+
+  const handleEditChange = (e) => {
+    const { name, value } = e.target;
+    setEditData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleEditCancel = () => {
+    setEditMode(false);
+    setEditData(null);
+  };
+
+  const handleEditSave = async () => {
+    try {
+      const res = await api.put(`/customers/${editData._id}`, editData);
+      setCustomerDetails((prev) => ({ ...prev, customer: res.data }));
+      setCustomers((prev) => prev.map((c) => (c._id === res.data._id ? res.data : c)));
+      setEditMode(false);
+      setEditData(null);
+    } catch (err) {
+      alert("Failed to update customer");
+    }
+  };
+
   return (
     <div className="card">
       <div className="mb-4 flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-semibold">Customers</h3>
-          <p className="text-sm text-slate-500">All customer records with DISCOM and lead details.</p>
-        </div>
+        <h3 className="text-lg font-semibold">Customers</h3>
+        <p className="text-sm text-slate-500">All customer records with DISCOM and lead details.</p>
       </div>
-
       <div className="overflow-x-auto">
         <table className="min-w-full text-left text-sm">
           <thead className="bg-slate-50 text-slate-600">
             <tr>
-              <th className="px-3 py-2">Name</th>
-              <th className="px-3 py-2">Contact</th>
-              <th className="px-3 py-2">DISCOM</th>
-              <th className="px-3 py-2">Address</th>
-              <th className="px-3 py-2">Lead By</th>
+              <th className="px-3 py-3">Name</th>
+              <th className="px-3 py-3">Mobile / Email</th>
+              <th className="px-3 py-3">DISCOM</th>
+              <th className="px-3 py-3">Address</th>
+              <th className="px-3 py-3">Lead By</th>
             </tr>
           </thead>
           <tbody>
             {customers.map((customer) => (
-              <tr key={customer._id} className="border-t border-slate-200">
+              <tr key={customer._id} className="border-t border-slate-200" onClick={() => handleCustomerClick(customer)} style={{ cursor: 'pointer' }}>
                 <td className="px-3 py-3 font-medium">{customer.name}</td>
                 <td className="px-3 py-3">{customer.mobileNumber}<br /><span className="text-xs text-slate-500">{customer.emailAddress}</span></td>
                 <td className="px-3 py-3">{customer.discom}</td>
@@ -41,6 +87,141 @@ export default function CustomersPage() {
           </tbody>
         </table>
       </div>
+
+      {/* Full-window overlay for customer details and pipeline */}
+      {detailsOpen && (
+        <div className="fixed inset-0 z-50 flex flex-col bg-black bg-opacity-60">
+          <div className="flex-1 flex flex-col items-center justify-center overflow-y-auto">
+            <div className="relative w-full max-w-3xl bg-white rounded-2xl shadow-xl p-8 mx-auto my-8">
+              <button className="absolute top-4 right-4 text-2xl text-gray-500 hover:text-gray-700" onClick={() => { setDetailsOpen(false); setCustomerDetails(null); setEditMode(false); setEditData(null); }}>&times;</button>
+              {loadingDetails ? (
+                <div>Loading...</div>
+              ) : customerDetails ? (
+                customerDetails.error ? (
+                  <div className="text-red-500">{customerDetails.error}</div>
+                ) : (
+                  <>
+                    {/* PipelineSteps for this customer's main project */}
+                    {customerDetails.projects && customerDetails.projects.length > 0 && (
+                      <PipelineSteps
+                        stages={[
+                          "Proposal",
+                          "Document Collection",
+                          "Login Required",
+                          "Login Complete",
+                          "Problemeting File",
+                          "Document Generation",
+                          "Digital Approval Pending",
+                          "Digital Approval Complete",
+                          "Need to Bank submit",
+                          "Submitted In bank",
+                          "Waiting for Disbursement",
+                          "Loan Disbursement Complete",
+                          "Installation Pending",
+                          "Demand Note Generation",
+                          "Demand Note Payment Complete",
+                          "Inspection Process",
+                          "Inspection Complete",
+                          "Document upload in MNRE Portal",
+                          "Inspection Pending/ Complete",
+                          "Subsidy apply Pending",
+                          "Subsidy Redeemed",
+                          "Subsidy Disbursed"
+                        ]}
+                        currentStage={customerDetails.projects[0].status}
+                      />
+                    )}
+                    <div className="mt-6">
+                      <h4 className="text-lg font-semibold mb-2">Customer Details</h4>
+                      {editMode ? (
+                        <div className="space-y-2">
+                          <div>
+                            <label className="block text-sm font-medium">Name</label>
+                            <input className="input input-bordered w-full" name="name" value={editData.name} onChange={handleEditChange} />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium">Mobile Number</label>
+                            <input className="input input-bordered w-full" name="mobileNumber" value={editData.mobileNumber} onChange={handleEditChange} />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium">Email</label>
+                            <input className="input input-bordered w-full" name="emailAddress" value={editData.emailAddress} onChange={handleEditChange} />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium">DISCOM</label>
+                            <select className="input input-bordered w-full" name="discom" value={editData.discom} onChange={handleEditChange}>
+                              <option value="">Select</option>
+                              <option value="TPCODL">TPCODL</option>
+                              <option value="TPSODL">TPSODL</option>
+                              <option value="TPWODL">TPWODL</option>
+                              <option value="TPNODL">TPNODL</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium">Address</label>
+                            <input className="input input-bordered w-full" name="address" value={editData.address} onChange={handleEditChange} />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium">Lead By</label>
+                            <input className="input input-bordered w-full" name="leadBy" value={editData.leadBy} onChange={handleEditChange} />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium">Consumer Number</label>
+                            <input className="input input-bordered w-full" name="consumerNumber" value={editData.consumerNumber} onChange={handleEditChange} />
+                          </div>
+                          <div className="flex gap-2 mt-4">
+                            <button className="btn btn-primary" onClick={handleEditSave}>Save</button>
+                            <button className="btn btn-secondary" onClick={handleEditCancel}>Cancel</button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div>
+                          <div className="mb-2">
+                            <strong>Name:</strong> {customerDetails.customer?.name} <br />
+                            <strong>Contact:</strong> {customerDetails.customer?.mobileNumber} <br />
+                            <strong>Email:</strong> {customerDetails.customer?.emailAddress} <br />
+                            <strong>DISCOM:</strong> {customerDetails.customer?.discom} <br />
+                            <strong>Address:</strong> {customerDetails.customer?.address} <br />
+                            <strong>Lead By:</strong> {customerDetails.customer?.leadBy} <br />
+                            <strong>Consumer Number:</strong> {customerDetails.customer?.consumerNumber}
+                          </div>
+                          <button className="btn btn-primary mb-4" onClick={handleEdit}>Edit</button>
+                          <div className="mb-2">
+                            <strong>Documents:</strong>
+                            {customerDetails.documents && customerDetails.documents.length > 0 ? (
+                              <ul className="list-disc ml-5">
+                                {customerDetails.documents.map((doc) => (
+                                  <li key={doc._id}>{doc.type}: <a href={doc.path} className="text-blue-600 underline" target="_blank" rel="noopener noreferrer">{doc.fileName}</a></li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <div>No documents found.</div>
+                            )}
+                          </div>
+                          <div>
+                            <strong>Projects / Work Process:</strong>
+                            {customerDetails.projects && customerDetails.projects.length > 0 ? (
+                              <ul className="list-disc ml-5">
+                                {customerDetails.projects.map((proj) => (
+                                  <li key={proj._id}>{proj.name} - {proj.status}</li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <div>No projects found.</div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )
+              ) : null}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
+export default CustomersPage;
