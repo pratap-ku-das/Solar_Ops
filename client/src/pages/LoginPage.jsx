@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import ProfileImage from "../assets/ProfileImage.png";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
