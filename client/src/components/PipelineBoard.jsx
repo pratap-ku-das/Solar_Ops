@@ -14,20 +14,41 @@ export default function PipelineBoard({ stages = [], projects = [] }) {
   }, {});
 
   return (
-    <div className="card overflow-x-auto">
+    <div className="card">
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-slate-900">Project Pipeline</h3>
-          <p className="text-sm text-slate-500">Track every project from proposal to subsidy disbursement.</p>
+          <h3 className="text-lg font-semibold text-slate-900">
+            Project Pipeline
+          </h3>
+
+          <p className="text-sm text-slate-500">
+            Track every project from proposal to subsidy disbursement.
+          </p>
         </div>
       </div>
 
-      <div className="flex min-w-max gap-3 pb-1">
+      <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+
         {stages.map((stage) => (
-          <div key={stage} className="w-48 rounded-2xl border border-slate-200 bg-slate-50 p-3">
-            <span className={`badge ${stageColors[stage] || "bg-violet-100 text-violet-700"}`}>{stage}</span>
-            <p className="mt-4 text-2xl font-bold text-slate-900">{counts[stage] || 0}</p>
-            <p className="text-xs text-slate-500">projects in stage</p>
+          <div
+            key={stage}
+            className="rounded-2xl border border-slate-200 bg-slate-50 p-3"
+          >
+            <span
+              className={`badge ${
+                stageColors[stage] || "bg-violet-100 text-violet-700"
+              }`}
+            >
+              {stage}
+            </span>
+
+            <p className="mt-4 text-2xl font-bold text-slate-900">
+              {counts[stage] || 0}
+            </p>
+
+            <p className="text-xs text-slate-500">
+              projects in stage
+            </p>
           </div>
         ))}
       </div>

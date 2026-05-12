@@ -7,13 +7,15 @@ const { demoStock, createId } = require("../data/sampleData");
 const router = express.Router();
 
 router.get("/", protect, async (req, res) => {
-  const items = mongoose.connection.readyState === 1 ? await Stock.find().sort({ createdAt: -1 }) : [...demoStock].reverse();
+  const company = req.user.company || "";
+  const items = mongoose.connection.readyState === 1 ? await Stock.find(company ? { company } : {}).sort({ createdAt: -1 }) : [...demoStock].reverse().filter((item) => !company || item.company === company);
   res.json(items);
 });
 
 router.post("/", protect, authorize("admin", "operations"), async (req, res) => {
   const payload = {
     ...req.body,
+    company: req.user.company || req.body.company || "",
     availableQuantity: Number(req.body.availableQuantity || 0),
     stockIn: Number(req.body.stockIn || 0),
     stockOut: Number(req.body.stockOut || 0)

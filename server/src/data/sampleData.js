@@ -3,6 +3,7 @@ const crypto = require("crypto");
 const createId = () => crypto.randomUUID();
 
 const PIPELINE_STAGES = [
+  "Project Initiated",
   "Proposal",
   "Document Collection",
   "Login Required",
@@ -29,14 +30,15 @@ const PIPELINE_STAGES = [
 ];
 
 const demoUsers = [
-  { _id: "USR-001", name: "Admin User", email: "admin@solar.com", password: "admin123", role: "admin" },
-  { _id: "USR-002", name: "Operations Lead", email: "ops@solar.com", password: "ops123", role: "operations" },
-  { _id: "USR-003", name: "BDM Executive", email: "bdm@solar.com", password: "bdm123", role: "bdm" }
+  { _id: "USR-001", name: "Admin User", company: "Solar PM", email: "admin@solar.com", password: "admin123", role: "admin" },
+  { _id: "USR-002", name: "Operations Lead", company: "Solar PM", email: "ops@solar.com", password: "ops123", role: "operations" },
+  { _id: "USR-003", name: "BDM Executive", company: "Solar PM", email: "bdm@solar.com", password: "bdm123", role: "bdm" }
 ];
 
 const demoCustomers = [
   {
     _id: "CUS-001",
+    company: "Solar PM",
     name: "Amit Kumar",
     mobileNumber: "9876543210",
     emailAddress: "amit.kumar@email.com",
@@ -47,6 +49,7 @@ const demoCustomers = [
   },
   {
     _id: "CUS-002",
+    company: "Solar PM",
     name: "Priya Das",
     mobileNumber: "9123456780",
     emailAddress: "priya.das@email.com",
@@ -57,6 +60,7 @@ const demoCustomers = [
   },
   {
     _id: "CUS-003",
+    company: "Solar PM",
     name: "Green Foods Pvt Ltd",
     mobileNumber: "9000011111",
     emailAddress: "accounts@greenfoods.com",
@@ -70,6 +74,7 @@ const demoCustomers = [
 const demoProjects = [
   {
     _id: "PRJ-001",
+    company: "Solar PM",
     customerId: "CUS-001",
     name: "Amit Kumar Rooftop Solar",
     customerName: "Amit Kumar",
@@ -97,6 +102,7 @@ const demoProjects = [
   },
   {
     _id: "PRJ-002",
+    company: "Solar PM",
     customerId: "CUS-002",
     name: "Priya Das Hybrid System",
     customerName: "Priya Das",
@@ -121,6 +127,7 @@ const demoProjects = [
   },
   {
     _id: "PRJ-003",
+    company: "Solar PM",
     customerId: "CUS-003",
     name: "Green Foods Commercial Plant",
     customerName: "Green Foods Pvt Ltd",
@@ -146,20 +153,99 @@ const demoProjects = [
 ];
 
 const demoExpenses = [
-  { _id: createId(), projectId: "PRJ-001", projectName: "Amit Kumar Rooftop Solar", materialCost: 180000, laborCost: 25000, transportCost: 8000, totalCost: 213000 },
-  { _id: createId(), projectId: "PRJ-002", projectName: "Priya Das Hybrid System", materialCost: 120000, laborCost: 18000, transportCost: 6000, totalCost: 144000 },
-  { _id: createId(), projectId: "PRJ-003", projectName: "Green Foods Commercial Plant", materialCost: 390000, laborCost: 42000, transportCost: 17000, totalCost: 449000 }
+  { _id: createId(), company: "Solar PM", projectId: "PRJ-001", projectName: "Amit Kumar Rooftop Solar", materialCost: 180000, laborCost: 25000, transportCost: 8000, totalCost: 213000 },
+  { _id: createId(), company: "Solar PM", projectId: "PRJ-002", projectName: "Priya Das Hybrid System", materialCost: 120000, laborCost: 18000, transportCost: 6000, totalCost: 144000 },
+  { _id: createId(), company: "Solar PM", projectId: "PRJ-003", projectName: "Green Foods Commercial Plant", materialCost: 390000, laborCost: 42000, transportCost: 17000, totalCost: 449000 }
 ];
 
 const demoStock = [
-  { _id: createId(), itemName: "Solar Panels 550W", category: "Solar Panels", availableQuantity: 120, unit: "pcs", stockIn: 150, stockOut: 30 },
-  { _id: createId(), itemName: "String Inverter 5kW", category: "Inverters", availableQuantity: 22, unit: "pcs", stockIn: 30, stockOut: 8 },
-  { _id: createId(), itemName: "Galvanized Structure Kit", category: "Structure Materials", availableQuantity: 40, unit: "sets", stockIn: 52, stockOut: 12 }
+  { _id: createId(), company: "Solar PM", itemName: "Solar Panels 550W", category: "Solar Panels", availableQuantity: 120, unit: "pcs", stockIn: 150, stockOut: 30 },
+  { _id: createId(), company: "Solar PM", itemName: "String Inverter 5kW", category: "Inverters", availableQuantity: 22, unit: "pcs", stockIn: 30, stockOut: 8 },
+  { _id: createId(), company: "Solar PM", itemName: "Galvanized Structure Kit", category: "Structure Materials", availableQuantity: 40, unit: "sets", stockIn: 52, stockOut: 12 }
 ];
 
 const demoInvoices = [
-  { _id: createId(), invoiceNumber: "INV-1001", customerName: "Amit Kumar", projectName: "Amit Kumar Rooftop Solar", projectSize: "5kW", amount: 325000, status: "Paid", createdAt: "2026-03-08T11:00:00.000Z" },
-  { _id: createId(), invoiceNumber: "INV-1002", customerName: "Priya Das", projectName: "Priya Das Hybrid System", projectSize: "3kW", amount: 240000, status: "Pending", createdAt: "2026-03-15T10:00:00.000Z" }
+  { _id: createId(), company: "Solar PM", invoiceNumber: "INV-1001", customerName: "Amit Kumar", projectName: "Amit Kumar Rooftop Solar", projectSize: "5kW", amount: 325000, status: "Paid", createdAt: "2026-03-08T11:00:00.000Z" },
+  { _id: createId(), company: "Solar PM", invoiceNumber: "INV-1002", customerName: "Priya Das", projectName: "Priya Das Hybrid System", projectSize: "3kW", amount: 240000, status: "Pending", createdAt: "2026-03-15T10:00:00.000Z" }
+];
+
+const demoLeads = [
+  {
+    _id: "LD-001",
+    company: "Solar PM",
+    leadCode: "LD-20260512-0001",
+    customerName: "Ananya Mishra",
+    phoneNumber: "9876501234",
+    email: "ananya@example.com",
+    address: "Bhubaneswar, Odisha",
+    cityState: "Bhubaneswar, Odisha",
+    discom: "TPCODL",
+    systemRequirementKw: 5,
+    roofType: "RCC",
+    electricityBill: { fileName: "ananya-bill.pdf", path: "/uploads/ananya-bill.pdf", mimeType: "application/pdf" },
+    leadSource: "Website",
+    notes: "Interested in rooftop solar for home",
+    assignedSalespersonId: "USR-003",
+    assignedSalespersonName: "BDM Executive",
+    assignedSalespersonEmail: "bdm@solar.com",
+    status: "Qualified",
+    communicationHistory: [
+      { channel: "Call", note: "Discussed available subsidy options.", by: "BDM Executive", at: new Date().toISOString() }
+    ],
+    siteSurvey: { surveyDate: "2026-05-10", surveyor: "Ops Team", roofCondition: "Good", shadowAnalysis: "Low", notes: "Ready for survey" },
+    proposal: { amount: 325000, validity: "15 days", notes: "Preliminary proposal shared", fileName: "", path: "" },
+    activityTimeline: [
+      { type: "Created", message: "Lead created for Ananya Mishra.", by: "Admin User", at: new Date().toISOString() }
+    ],
+    createdBy: "Admin User",
+    createdAt: "2026-05-12T08:00:00.000Z",
+    updatedAt: "2026-05-12T08:00:00.000Z"
+  },
+  {
+    _id: "LD-002",
+    company: "Solar PM",
+    leadCode: "LD-20260512-0002",
+    customerName: "Rahul Singh",
+    phoneNumber: "9000123456",
+    email: "rahul@example.com",
+    address: "Cuttack, Odisha",
+    cityState: "Cuttack, Odisha",
+    discom: "TPNODL",
+    systemRequirementKw: 3,
+    roofType: "Tin Shed",
+    electricityBill: { fileName: "rahul-bill.pdf", path: "/uploads/rahul-bill.pdf", mimeType: "application/pdf" },
+    leadSource: "Referral",
+    notes: "Corporate rooftop opportunity",
+    assignedSalespersonId: "USR-003",
+    assignedSalespersonName: "BDM Executive",
+    assignedSalespersonEmail: "bdm@solar.com",
+    status: "Proposal Sent",
+    communicationHistory: [],
+    siteSurvey: { surveyDate: "", surveyor: "", roofCondition: "", shadowAnalysis: "", notes: "" },
+    proposal: { amount: 240000, validity: "10 days", notes: "Proposal emailed", fileName: "", path: "" },
+    activityTimeline: [],
+    createdBy: "Admin User",
+    createdAt: "2026-05-11T11:30:00.000Z",
+    updatedAt: "2026-05-12T09:20:00.000Z"
+  }
+];
+
+const demoLeadAuditLogs = [
+  {
+    _id: createId(),
+    company: "Solar PM",
+    leadId: "LD-001",
+    leadCode: "LD-20260512-0001",
+    action: "Lead Created",
+    fromStatus: "",
+    toStatus: "New",
+    actorId: "USR-001",
+    actorName: "Admin User",
+    actorRole: "admin",
+    note: "Lead captured from website enquiry.",
+    metadata: {},
+    createdAt: new Date().toISOString()
+  }
 ];
 
 module.exports = {
@@ -170,5 +256,7 @@ module.exports = {
   demoExpenses,
   demoStock,
   demoInvoices,
+  demoLeads,
+  demoLeadAuditLogs,
   createId
 };

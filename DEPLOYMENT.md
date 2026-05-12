@@ -24,3 +24,4 @@
 - The Express server now serves the built React app in production.
 - MongoDB Atlas and Gmail SMTP must be valid for live data and email reminders.
 - Rotate any secrets that were shared in plain text before production deployment.
+- For local development with MongoDB Compass, use `mongodb://127.0.0.1:27017/solar_pm` and start MongoDB Community Server before running the backend.

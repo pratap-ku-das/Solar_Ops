@@ -1,12 +1,21 @@
 const mongoose = require("mongoose");
 const dns = require("dns");
+const { MongoMemoryServer } = require("mongodb-memory-server");
+
+let embeddedMongoServer = null;
 
 const configureMongoDns = (mongoUri) => {
   if (!mongoUri || !mongoUri.startsWith("mongodb+srv://")) {
     return;
   }
 
-  const servers = (process.env.MONGO_DNS_SERVERS || "8.8.8.8,1.1.1.1")
+  const dnsServers = process.env.MONGO_DNS_SERVERS;
+
+  if (!dnsServers) {
+    return;
+  }
+
+  const servers = dnsServers
     .split(",")
     .map((item) => item.trim())
     .filter(Boolean);
@@ -21,6 +30,24 @@ const configureMongoDns = (mongoUri) => {
   } catch (error) {
     console.error("⚠️ Unable to apply custom DNS servers for MongoDB:", error.message);
   }
+};
+
+const startEmbeddedMongo = async (dbName) => {
+  if (embeddedMongoServer) {
+    return embeddedMongoServer.getUri(dbName);
+  }
+
+  embeddedMongoServer = await MongoMemoryServer.create({
+    instance: {
+      ip: "127.0.0.1",
+      port: 27017,
+      dbName
+    }
+  });
+
+  const embeddedUri = embeddedMongoServer.getUri(dbName);
+  console.log(`ℹ️ Started embedded MongoDB at ${embeddedUri}`);
+  return embeddedUri;
 };
 
 const connectDB = async () => {
@@ -48,18 +75,23 @@ const connectDB = async () => {
     return true;
   } catch (error) {
     const message = error?.message || "Unknown MongoDB error";
+    const isLocalMongoUri = mongoUri.startsWith("mongodb://127.0.0.1") || mongoUri.startsWith("mongodb://localhost");
 
     if (message.includes("querySrv")) {
       console.error("⚠️ MongoDB DNS lookup failed. A non-SRV Atlas URI may be required on this network:", message);
     } else if (message.toLowerCase().includes("whitelist")) {
       console.error("⚠️ MongoDB Atlas blocked this IP. Add the current machine IP in Atlas Network Access:", message);
+    } else if (isLocalMongoUri && message.toLowerCase().includes("econnrefused")) {
+      console.error("⚠️ Local MongoDB is not running. Start MongoDB Community Server or your Docker container, then reconnect Compass:", message);
     } else {
       console.error("⚠️ MongoDB connection failed:", message);
     }
 
-    if (allowDemoMode) {
-      console.error("ℹ️ Falling back to demo mode.");
-      return false;
+    if (isLocalMongoUri || allowDemoMode) {
+      const fallbackUri = await startEmbeddedMongo("solar_pm");
+      await mongoose.connect(fallbackUri, connectOptions);
+      console.log("✅ MongoDB connected via embedded local server");
+      return true;
     }
 
     throw error;

@@ -36,13 +36,43 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const forgotPassword = async (email) => {
+    setLoading(true);
+    try {
+      const { data } = await api.post("/auth/forgot-password", { email });
+      return data;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resetPassword = async (token, password) => {
+    setLoading(true);
+    try {
+      const { data } = await api.post(`/auth/reset-password/${token}`, { password });
+      return data;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem("solarToken");
     localStorage.removeItem("solarUser");
     setUser(null);
   };
 
-  const value = useMemo(() => ({ user, loading, login, register, logout }), [user, loading]);
+  const updateUser = (updates) => {
+    setUser((currentUser) => {
+      const nextUser = typeof updates === "function" ? updates(currentUser) : { ...currentUser, ...updates };
+      if (nextUser) {
+        localStorage.setItem("solarUser", JSON.stringify(nextUser));
+      }
+      return nextUser;
+    });
+  };
+
+  const value = useMemo(() => ({ user, loading, login, register, forgotPassword, resetPassword, logout, updateUser }), [user, loading]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

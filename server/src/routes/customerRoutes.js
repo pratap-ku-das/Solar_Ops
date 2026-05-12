@@ -7,17 +7,18 @@ const { demoCustomers, createId } = require("../data/sampleData");
 const router = express.Router();
 
 router.get("/", protect, async (req, res) => {
-  const customers = mongoose.connection.readyState === 1 ? await Customer.find().sort({ createdAt: -1 }) : [...demoCustomers].reverse();
+  const company = req.user.company || "";
+  const customers = mongoose.connection.readyState === 1 ? await Customer.find(company ? { company } : {}).sort({ createdAt: -1 }) : [...demoCustomers].reverse().filter((item) => !company || item.company === company);
   res.json(customers);
 });
 
 router.post("/", protect, authorize("admin", "bdm"), async (req, res) => {
   if (mongoose.connection.readyState === 1) {
-    const customer = await Customer.create(req.body);
+    const customer = await Customer.create({ ...req.body, company: req.user.company || req.body.company || "" });
     return res.status(201).json(customer);
   }
 
-  const customer = { _id: createId(), ...req.body, createdAt: new Date().toISOString() };
+  const customer = { _id: createId(), ...req.body, company: req.user.company || req.body.company || "", createdAt: new Date().toISOString() };
   demoCustomers.push(customer);
   res.status(201).json(customer);
 });
@@ -30,14 +31,15 @@ const Project = require("../models/Project");
 router.get("/:id/details", protect, async (req, res) => {
   try {
     const { id } = req.params;
+    const company = req.user.company || "";
     let customer, documents, projects;
     if (mongoose.connection.readyState === 1) {
-      customer = await Customer.findById(id);
-      documents = await Document.find({ customerId: id });
-      projects = await Project.find({ customerId: id });
+      customer = await Customer.findOne({ _id: id, ...(company ? { company } : {}) });
+      documents = await Document.find({ customerId: id, ...(company ? { company } : {}) });
+      projects = await Project.find({ customerId: id, ...(company ? { company } : {}) });
     } else {
       // Demo mode: find in-memory
-      customer = demoCustomers.find((c) => c._id === id);
+      customer = demoCustomers.find((c) => c._id === id && (!company || c.company === company));
       documents = [];
       projects = [];
     }
@@ -52,12 +54,13 @@ router.get("/:id/details", protect, async (req, res) => {
 router.put("/:id", protect, authorize("admin", "bdm"), async (req, res) => {
   try {
     const { id } = req.params;
+    const company = req.user.company || "";
     let updatedCustomer;
     if (mongoose.connection.readyState === 1) {
-      updatedCustomer = await Customer.findByIdAndUpdate(id, req.body, { new: true });
+      updatedCustomer = await Customer.findOneAndUpdate({ _id: id, ...(company ? { company } : {}) }, req.body, { new: true });
     } else {
       // Demo mode: update in-memory
-      const idx = demoCustomers.findIndex((c) => c._id === id);
+      const idx = demoCustomers.findIndex((c) => c._id === id && (!company || c.company === company));
       if (idx !== -1) {
         demoCustomers[idx] = { ...demoCustomers[idx], ...req.body };
         updatedCustomer = demoCustomers[idx];

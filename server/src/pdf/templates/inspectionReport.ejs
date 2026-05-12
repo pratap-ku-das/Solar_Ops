@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+  <meta charset="UTF-8" />
+
+  <title>Inspection Report</title>
+
+  <style>
+
+    @page {
+      size: A4;
+      margin: 15px;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 11px;
+      color: #000;
+    }
+
+    h1, h2, h3 {
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+
+    .top-space {
+      margin-top: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      border: 1px solid black;
+      padding: 5px;
+      vertical-align: top;
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    .section {
+      background: #e6e6e6;
+      font-weight: bold;
+    }
+
+    .signature-box td {
+      height: 100px;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+<h2>FORM - 3</h2>
+
+<h2>Work Completion and Inspection Report</h2>
+
+<h2 class="top-space">
+TP CENTRAL ODISHA DISTRIBUTION LIMITED
+</h2>
+
+<p class="top-space">
+
+Certified that Designated officer,
+
+<b><%= division || "" %></b>
+
+Division, TPCODL along MRT have personally inspected the
+
+<b><%= capacity || "" %></b>
+
+kWp SRTPV system at
+
+<b><%= address || "" %></b>
+
+on date
+
+<b><%= inspectionDate || "" %></b>
+
+</p>
+
+<h3 class="top-space">
+
+Work Completion and Inspection Report for
+
+<%= capacity || "" %>
+
+KWp Solar Roof Top PV System (SRTPV)
+
+at
+
+<%= address || "" %>
+
+</h3>
+
+<table>
+
+<tr class="section">
+
+<th width="8%">Sl No.</th>
+<th width="52%">Parameter</th>
+<th width="40%">Utility Observation</th>
+
+</tr>
+
+<tr class="section">
+
+<td class="center">A</td>
+<td colspan="2">Applicant Details</td>
+
+</tr>
+
+<tr>
+
+<td class="center">1</td>
+<td>Name of Applicant</td>
+<td><%= customerName || "" %></td>
+
+</tr>
+
+<tr>
+
+<td class="center">2</td>
+<td>Application No.</td>
+<td><%= applicationNo || "" %></td>
+
+</tr>
+
+<tr>
+
+<td class="center">3</td>
+<td>Address</td>
+<td><%= address || "" %></td>
+
+</tr>
+
+<tr>
+
+<td class="center">4</td>
+<td>Consumer Number</td>
+<td><%= consumerNumber || "" %></td>
+
+</tr>
+
+<tr>
+
+<td class="center">5</td>
+<td>Consumer Category</td>
+<td><%= consumerCategory || "" %></td>
+
+</tr>
+
+<tr>
+
+<td class="center">6</td>
+<td>Type of Connection</td>
+<td><%= connectionType || "" %></td>
+
+</tr>
+
+<tr>
+
+<td class="center">7</td>
+<td>Contract Demand</td>
+<td><%= contractDemand || "" %></td>
+
+</tr>
+
+<tr>
+
+<td class="center">8</td>
+<td>Arrear if Any</td>
+<td><%= arrear || "" %></td>
+
+</tr>
+
+<tr>
+
+<td class="center">9</td>
+<td>Name of Developer/Vendor</td>
+<td><%= developerName || "" %></td>
+
+</tr>
+
+<tr>
+
+<td class="center">10</td>
+<td>Date of Installation</td>
+<td><%= installationDate || "" %></td>
+
+</tr>
+
+</table>
+
+<br>
+
+<h3>Inspection Report</h3>
+
+<table>
+
+<tr>
+
+<td width="60%">
+
+Whether installed SRTPV system is satisfactory
+for grid connectivity/synchronization
+
+</td>
+
+<td width="40%">
+
+<%= gridSatisfactory || "" %>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>Provision of Manual and Automatic Switches</td>
+
+<td>
+
+<%= switchProvision || "" %>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>Operation & Maintenance Information Provided</td>
+
+<td>
+
+<%= operationMaintenance || "" %>
+
+</td>
+
+</tr>
+
+</table>
+
+<br><br>
+
+<table class="signature-box">
+
+<tr>
+
+<td width="33%">
+
+Signature of Applicant
+
+<br><br><br>
+
+Name:
+
+<%= customerName || "" %>
+
+<br>
+
+Date:
+
+<%= inspectionDate || "" %>
+
+</td>
+
+<td width="33%">
+
+Certified By
+
+<br><br><br>
+
+Designated Officer
+
+<br>
+
+TPCODL
+
+</td>
+
+<td width="33%">
+
+Installer Signature with Seal
+
+<br><br><br>
+
+<%= developerName || "" %>
+
+<br>
+
+Date:
+
+<%= inspectionDate || "" %>
+
+</td>
+
+</tr>
+
+</table>
+
+<br><br>
+
+<h4>Enclosures:</h4>
+
+<ol>
+
+<li>IEC/IS Test Reports</li>
+
+<li>Array Mounting System Drawings</li>
+
+<li>Single Line Wiring Diagram</li>
+
+<li>Maintenance & Operation Information</li>
+
+</ol>
+
+</body>
+
+</html>

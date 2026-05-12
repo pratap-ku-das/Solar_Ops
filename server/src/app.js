@@ -10,16 +10,18 @@ const customerRoutes = require("./routes/customerRoutes");
 const expenseRoutes = require("./routes/expenseRoutes");
 const stockRoutes = require("./routes/stockRoutes");
 const invoiceRoutes = require("./routes/invoiceRoutes");
+const leadRoutes = require("./routes/leadRoutes");
 const userRoutes = require("./routes/userRoutes");
 const systemRoutes = require("./routes/systemRoutes");
+const pdfRoutes = require("./routes/pdfRoutes");
 
 const app = express();
 const clientDistPath = path.join(__dirname, "../../client/dist");
 const isProduction = process.env.NODE_ENV === "production";
 
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(morgan("dev"));
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
@@ -30,12 +32,14 @@ app.get("/api/health", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/projects", projectRoutes);
+app.use("/api/leads", leadRoutes);
 app.use("/api/customers", customerRoutes);
 app.use("/api/expenses", expenseRoutes);
 app.use("/api/stock", stockRoutes);
 app.use("/api/invoices", invoiceRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/system", systemRoutes);
+app.use("/api/pdf", pdfRoutes);
 
 if (isProduction) {
   app.use(express.static(clientDistPath));

@@ -3,6 +3,8 @@ const { PIPELINE_STAGES } = require("../data/sampleData");
 
 const projectSchema = new mongoose.Schema(
   {
+    company: { type: String, default: "" },
+    projectCode: { type: String, unique: true, sparse: true },
     customerId: { type: mongoose.Schema.Types.ObjectId, ref: "Customer" },
     name: { type: String, required: true },
     customerName: { type: String, required: true },
@@ -18,6 +20,12 @@ const projectSchema = new mongoose.Schema(
     address: { type: String },
     consumerNumber: { type: String },
     leadBy: { type: String },
+    sourceLeadId: { type: String, default: "" },
+    sourceLeadCode: { type: String, default: "" },
+    leadSource: { type: String, default: "" },
+    proposalValue: { type: Number, default: 0 },
+    assignedTeam: { type: String, default: "" },
+    timelineTracker: { type: Array, default: [] },
     status: { type: String, enum: PIPELINE_STAGES, default: "Proposal" },
     installedCapacity: { type: Number, default: 0 },
     installationDate: { type: String },

@@ -8,8 +8,9 @@ const { demoExpenses, demoProjects, createId } = require("../data/sampleData");
 const router = express.Router();
 
 router.get("/", protect, async (req, res) => {
-  const expenses = mongoose.connection.readyState === 1 ? await Expense.find().sort({ createdAt: -1 }).lean() : [...demoExpenses].reverse();
-  const projects = mongoose.connection.readyState === 1 ? await Project.find().lean() : demoProjects;
+  const company = req.user.company || "";
+  const expenses = mongoose.connection.readyState === 1 ? await Expense.find(company ? { company } : {}).sort({ createdAt: -1 }).lean() : [...demoExpenses].reverse().filter((item) => !company || item.company === company);
+  const projects = mongoose.connection.readyState === 1 ? await Project.find(company ? { company } : {}).lean() : demoProjects.filter((item) => !company || item.company === company);
 
   const enriched = expenses.map((expense) => {
     const project = projects.find((item) => String(item._id) === String(expense.projectId) || item.name === expense.projectName);
@@ -31,6 +32,7 @@ router.post("/", protect, authorize("admin", "operations"), async (req, res) => 
   const transportCost = Number(req.body.transportCost || 0);
   const payload = {
     ...req.body,
+    company: req.user.company || req.body.company || "",
     totalCost: materialCost + laborCost + transportCost
   };
 

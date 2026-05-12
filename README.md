@@ -26,6 +26,8 @@ npm run dev
 
 The app runs in **demo mode** without MongoDB if `MONGO_URI` is not configured. Add `server/.env` from `server/.env.example` to enable persistent MongoDB storage.
 
+For a local setup, use MongoDB Compass with `mongodb://127.0.0.1:27017/solar_pm` and make sure MongoDB Community Server is running on the same machine before starting the backend.
+
 ## Key Features
 - Multi-role dashboards for **Admin**, **Operations**, and **BDM**
 - End-to-end solar project pipeline from **Proposal** to **Subsidy Disbursed**

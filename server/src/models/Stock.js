@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const stockSchema = new mongoose.Schema(
   {
+    company: { type: String, default: "" },
     itemName: { type: String, required: true },
     category: { type: String, required: true },
     availableQuantity: { type: Number, default: 0 },

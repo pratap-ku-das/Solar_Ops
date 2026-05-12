@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const expenseSchema = new mongoose.Schema(
   {
+    company: { type: String, default: "" },
     projectId: { type: mongoose.Schema.Types.ObjectId, ref: "Project" },
     projectName: { type: String, required: true },
     materialCost: { type: Number, default: 0 },

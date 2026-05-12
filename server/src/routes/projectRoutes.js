@@ -8,8 +8,11 @@ const Document = require("../models/Document");
 const { protect, authorize } = require("../middleware/authMiddleware");
 const { sendReminderEmail } = require("../utils/emailService");
 const { PIPELINE_STAGES, demoProjects, demoCustomers, createId } = require("../data/sampleData");
-
+const sendWhatsApp =
+require("../utils/sendWhatsApp");
 const router = express.Router();
+
+const generateProjectCode = () => `PRJ-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, path.join(__dirname, "../../uploads")),
@@ -23,7 +26,8 @@ router.get("/pipeline/stages", protect, (req, res) => {
 });
 
 router.get("/export/csv", protect, async (req, res) => {
-  const projects = mongoose.connection.readyState === 1 ? await Project.find().lean() : demoProjects;
+  const company = req.user.company || "";
+  const projects = mongoose.connection.readyState === 1 ? await Project.find(company ? { company } : {}).lean() : demoProjects.filter((item) => !company || item.company === company);
   const headers = ["Customer Name", "Mobile", "DISCOM", "Project Size", "Type", "Cost", "Status"];
   const rows = projects.map((project) => [
     project.customerName,
@@ -44,8 +48,9 @@ router.get("/export/csv", protect, async (req, res) => {
 router.get("/", protect, async (req, res) => {
   const { search = "", status = "", discom = "" } = req.query;
   const useDatabase = mongoose.connection.readyState === 1;
+  const company = req.user.company || "";
 
-  let projects = useDatabase ? await Project.find().sort({ createdAt: -1 }).lean() : [...demoProjects].reverse();
+  let projects = useDatabase ? await Project.find(company ? { company } : {}).sort({ createdAt: -1 }).lean() : [...demoProjects].reverse().filter((item) => !company || item.company === company);
 
   projects = projects.filter((project) => {
     const matchesSearch =
@@ -65,16 +70,19 @@ router.get("/", protect, async (req, res) => {
 
 router.get("/:id", protect, async (req, res) => {
   const project = mongoose.connection.readyState === 1
-    ? await Project.findById(req.params.id).lean()
-    : demoProjects.find((item) => String(item._id) === String(req.params.id));
+    ? await Project.findOne({ _id: req.params.id, ...(req.user.company ? { company: req.user.company } : {}) }).lean()
+    : demoProjects.find((item) => String(item._id) === String(req.params.id) && (!req.user.company || item.company === req.user.company));
 
   if (!project) return res.status(404).json({ message: "Project not found." });
   res.json(project);
 });
 
 router.post("/", protect, authorize("admin", "bdm"), async (req, res) => {
+  const company = req.user.company || req.body.company || "";
   const payload = {
     ...req.body,
+    company,
+    projectCode: req.body.projectCode || generateProjectCode(),
     customerName: req.body.name,
     mobileNumber: req.body.mobileNumber,
     emailAddress: req.body.emailAddress,
@@ -85,6 +93,7 @@ router.post("/", protect, authorize("admin", "bdm"), async (req, res) => {
 
   if (mongoose.connection.readyState === 1) {
     const customer = await Customer.create({
+      company,
       name: req.body.name,
       mobileNumber: req.body.mobileNumber,
       emailAddress: req.body.emailAddress,
@@ -100,6 +109,7 @@ router.post("/", protect, authorize("admin", "bdm"), async (req, res) => {
 
   const customer = {
     _id: createId(),
+    company,
     name: req.body.name,
     mobileNumber: req.body.mobileNumber,
     emailAddress: req.body.emailAddress,
@@ -124,37 +134,132 @@ router.post("/", protect, authorize("admin", "bdm"), async (req, res) => {
   res.status(201).json(project);
 });
 
-router.put("/:id/status", protect, authorize("admin", "operations", "bdm"), async (req, res) => {
-  const { status } = req.body;
-  if (!PIPELINE_STAGES.includes(status)) {
-    return res.status(400).json({ message: "Invalid pipeline stage." });
-  }
+router.put(
+  "/:id/status",
+  protect,
+  authorize("admin", "operations", "bdm"),
 
-  if (mongoose.connection.readyState === 1) {
-    const project = await Project.findByIdAndUpdate(req.params.id, { status }, { new: true });
-    if (!project) return res.status(404).json({ message: "Project not found." });
+  async (req, res) => {
+
+    const { status } = req.body;
+
+    if (!PIPELINE_STAGES.includes(status)) {
+
+      return res.status(400).json({
+        message: "Invalid pipeline stage."
+      });
+
+    }
+
+    // DATABASE MODE
+
+    if (mongoose.connection.readyState === 1) {
+
+      const project =
+        await Project.findOne({ _id: req.params.id, ...(req.user.company ? { company: req.user.company } : {}) });
+
+      if (!project) {
+
+        return res.status(404).json({
+          message: "Project not found."
+        });
+
+      }
+
+      // UPDATE STATUS
+
+      project.status = status;
+
+      await project.save();
+
+      // STAGE MESSAGES
+
+      const stageMessages = {
+
+        Proposal:
+          "Your solar proposal has been created.",
+
+        "Document Collection":
+          "Document collection process started.",
+
+        "Digital Approval Pending":
+          "Your project is waiting for digital approval.",
+
+        "Installation Pending":
+          "Installation will start soon.",
+
+        "Inspection Complete":
+          "Inspection completed successfully.",
+
+        "Subsidy Disbursed":
+          "Your subsidy has been disbursed successfully."
+
+      };
+
+      // WHATSAPP MESSAGE
+
+      const message = `Hello ${project.customerName},
+
+Your solar project status has been updated.
+
+Current Stage:
+${project.status}
+
+${stageMessages[project.status] || ""}
+
+Thank you,
+Solar Company`;
+
+      // SEND WHATSAPP
+
+      if (project.mobileNumber) {
+
+        await sendWhatsApp(
+          project.mobileNumber,
+          message
+        );
+
+      }
+
+      return res.json(project);
+
+    }
+
+    // DEMO MODE
+
+      const project =
+      demoProjects.find(
+        (item) =>
+          String(item._id) === String(req.params.id) && (!req.user.company || item.company === req.user.company)
+      );
+
+    if (!project) {
+
+      return res.status(404).json({
+        message: "Project not found."
+      });
+
+    }
+
+    project.status = status;
+
     return res.json(project);
+
   }
-
-  const project = demoProjects.find((item) => String(item._id) === String(req.params.id));
-  if (!project) return res.status(404).json({ message: "Project not found." });
-
-  project.status = status;
-  res.json(project);
-});
+);
 
 router.post("/:id/schedule", protect, authorize("admin", "operations"), async (req, res) => {
   const { installationDate, installationTeam } = req.body;
 
   let project;
   if (mongoose.connection.readyState === 1) {
-    project = await Project.findById(req.params.id);
+    project = await Project.findOne({ _id: req.params.id, ...(req.user.company ? { company: req.user.company } : {}) });
     if (!project) return res.status(404).json({ message: "Project not found." });
     project.installationDate = installationDate;
     project.installationTeam = installationTeam;
     await project.save();
   } else {
-    project = demoProjects.find((item) => String(item._id) === String(req.params.id));
+    project = demoProjects.find((item) => String(item._id) === String(req.params.id) && (!req.user.company || item.company === req.user.company));
     if (!project) return res.status(404).json({ message: "Project not found." });
     project.installationDate = installationDate;
     project.installationTeam = installationTeam;
@@ -163,7 +268,7 @@ router.post("/:id/schedule", protect, authorize("admin", "operations"), async (r
   const message = `Installation scheduled for ${project.customerName} on ${installationDate} with ${installationTeam}.`;
   await Promise.allSettled([
     sendReminderEmail({ to: project.emailAddress || "customer@demo.local", subject: "Solar Installation Schedule", text: message }),
-    sendReminderEmail({ to: "installation.head@solar.com", subject: "Assigned Installation Schedule", text: message })
+    sendReminderEmail({ to: "pratapkudas111@gmail.com", subject: "Assigned Installation Schedule", text: message })
   ]);
 
   res.json({ message: "Installation scheduled and reminder email triggered.", project });
@@ -178,12 +283,13 @@ router.post("/:id/documents", protect, authorize("admin", "operations", "bdm"), 
   };
 
   if (mongoose.connection.readyState === 1) {
-    const project = await Project.findById(req.params.id);
+    const project = await Project.findOne({ _id: req.params.id, ...(req.user.company ? { company: req.user.company } : {}) });
     if (!project) return res.status(404).json({ message: "Project not found." });
 
     project.documents.push(documentPayload);
     await project.save();
     await Document.create({
+      company: project.company || req.user.company || "",
       projectId: project._id,
       customerId: project.customerId,
       ...documentPayload,
@@ -193,12 +299,34 @@ router.post("/:id/documents", protect, authorize("admin", "operations", "bdm"), 
     return res.status(201).json({ message: "Document uploaded.", document: documentPayload });
   }
 
-  const project = demoProjects.find((item) => String(item._id) === String(req.params.id));
+  const project = demoProjects.find((item) => String(item._id) === String(req.params.id) && (!req.user.company || item.company === req.user.company));
   if (!project) return res.status(404).json({ message: "Project not found." });
 
   project.documents = project.documents || [];
   project.documents.push({ _id: createId(), ...documentPayload });
   res.status(201).json({ message: "Document uploaded.", document: documentPayload });
+});
+
+router.delete("/:id", protect, authorize("admin", "operations"), async (req, res) => {
+  if (mongoose.connection.readyState === 1) {
+    const project = await Project.findOneAndDelete({ _id: req.params.id, ...(req.user.company ? { company: req.user.company } : {}) });
+
+    if (!project) {
+      return res.status(404).json({ message: "Project not found." });
+    }
+
+    await Document.deleteMany({ projectId: req.params.id, ...(req.user.company ? { company: req.user.company } : {}) });
+    return res.json({ message: "Project deleted successfully." });
+  }
+
+  const projectIndex = demoProjects.findIndex((item) => String(item._id) === String(req.params.id) && (!req.user.company || item.company === req.user.company));
+
+  if (projectIndex === -1) {
+    return res.status(404).json({ message: "Project not found." });
+  }
+
+  demoProjects.splice(projectIndex, 1);
+  res.json({ message: "Project deleted successfully." });
 });
 
 module.exports = router;
