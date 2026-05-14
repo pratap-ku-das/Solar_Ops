@@ -297,7 +297,7 @@ function CustomersPage() {
 
                       {editMode ? (
 
-                        <div className="space-y-2">
+                        <div className="space-y-3">
 
                           <div>
                             <label className="block text-sm font-medium">
@@ -307,12 +307,98 @@ function CustomersPage() {
                             <input
                               className="input input-bordered w-full"
                               name="name"
-                              value={editData.name}
+                              value={editData.name || ""}
                               onChange={handleEditChange}
                             />
                           </div>
 
-                          <div className="flex gap-2 mt-4">
+                          <div>
+                            <label className="block text-sm font-medium">
+                              Mobile Number
+                            </label>
+
+                            <input
+                              className="input input-bordered w-full"
+                              name="mobileNumber"
+                              value={editData.mobileNumber || ""}
+                              onChange={handleEditChange}
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium">
+                              Email Address
+                            </label>
+
+                            <input
+                              className="input input-bordered w-full"
+                              type="email"
+                              name="emailAddress"
+                              value={editData.emailAddress || ""}
+                              onChange={handleEditChange}
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium">
+                              DISCOM
+                            </label>
+
+                            <select
+                              className="input input-bordered w-full"
+                              name="discom"
+                              value={editData.discom || ""}
+                              onChange={handleEditChange}
+                            >
+                              <option value="">Select DISCOM</option>
+                              <option value="TPCODL">TPCODL</option>
+                              <option value="TPSODL">TPSODL</option>
+                              <option value="TPWODL">TPWODL</option>
+                              <option value="TPNODL">TPNODL</option>
+                            </select>
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium">
+                              Address
+                            </label>
+
+                            <textarea
+                              className="input input-bordered w-full"
+                              name="address"
+                              value={editData.address || ""}
+                              onChange={handleEditChange}
+                              rows="3"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium">
+                              Consumer Number
+                            </label>
+
+                            <input
+                              className="input input-bordered w-full"
+                              name="consumerNumber"
+                              value={editData.consumerNumber || ""}
+                              onChange={handleEditChange}
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium">
+                              Lead By
+                            </label>
+
+                            <input
+                              className="input input-bordered w-full"
+                              name="leadBy"
+                              value={editData.leadBy || ""}
+                              onChange={handleEditChange}
+                            />
+                          </div>
+
+                          <div className="flex gap-2 mt-6">
 
                             <button
                               className="btn btn-primary"
@@ -336,40 +422,21 @@ function CustomersPage() {
 
                         <div>
 
-                          <div className="mb-2">
+                          <div className="mb-4 space-y-2">
 
-                            <strong>Name:</strong>
-                            {customerDetails.customer?.name}
+                            <p><strong>Name:</strong> {customerDetails.customer?.name}</p>
 
-                            <br />
+                            <p><strong>Contact:</strong> {customerDetails.customer?.mobileNumber}</p>
 
-                            <strong>Contact:</strong>
-                            {customerDetails.customer?.mobileNumber}
+                            <p><strong>Email:</strong> {customerDetails.customer?.emailAddress}</p>
 
-                            <br />
+                            <p><strong>DISCOM:</strong> {customerDetails.customer?.discom}</p>
 
-                            <strong>Email:</strong>
-                            {customerDetails.customer?.emailAddress}
+                            <p><strong>Address:</strong> {customerDetails.customer?.address}</p>
 
-                            <br />
+                            <p><strong>Lead By:</strong> {customerDetails.customer?.leadBy}</p>
 
-                            <strong>DISCOM:</strong>
-                            {customerDetails.customer?.discom}
-
-                            <br />
-
-                            <strong>Address:</strong>
-                            {customerDetails.customer?.address}
-
-                            <br />
-
-                            <strong>Lead By:</strong>
-                            {customerDetails.customer?.leadBy}
-
-                            <br />
-
-                            <strong>Consumer Number:</strong>
-                            {customerDetails.customer?.consumerNumber}
+                            <p><strong>Consumer Number:</strong> {customerDetails.customer?.consumerNumber}</p>
 
                           </div>
 

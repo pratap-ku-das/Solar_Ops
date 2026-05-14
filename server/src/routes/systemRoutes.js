@@ -161,6 +161,30 @@ const getUserCompany = async (user) => {
   return null;
 };
 
+const migrateCompanyName = async (oldName, newName) => {
+  if (!oldName || !newName || oldName === newName) {
+    return;
+  }
+
+  const collections = [
+    User,
+    require("../models/Project"),
+    require("../models/Customer"),
+    require("../models/Expense"),
+    require("../models/Invoice"),
+    require("../models/Stock"),
+    require("../models/Lead"),
+    require("../models/Document"),
+    require("../models/LeadAuditLog")
+  ];
+
+  await Promise.all(
+    collections.map((Model) =>
+      Model.updateMany({ company: oldName }, { $set: { company: newName } })
+    )
+  );
+};
+
 router.get("/settings", protect, async (req, res) => {
   const user = await getUserFromRequest(req);
   const company = await getUserCompany(user);
@@ -175,6 +199,7 @@ router.put("/settings", protect, async (req, res) => {
   if (!user) return res.status(404).json({ message: "User not found" });
 
   let company = await getUserCompany(user);
+  const previousCompanyName = company?.companyName || user.company || "";
   if (!company) {
     company = await Company.create({
       companyName: user.company || "SunBright Energy Pvt Ltd",
@@ -211,6 +236,8 @@ router.put("/settings", protect, async (req, res) => {
   user.company = mergedIncoming.profile.companyName || user.company;
 
   await Promise.all([company.save(), user.save()]);
+
+  await migrateCompanyName(previousCompanyName, company.companyName);
 
   return res.json(mergedIncoming);
 });

@@ -86,6 +86,7 @@ export default function SettingsPage() {
                 name: res.data?.profile?.fullName || currentUser.name,
                 company: res.data?.profile?.companyName || currentUser.company,
                 email: res.data?.profile?.email || currentUser.email,
+                logo: res.data?.profile?.logo || currentUser.logo,
                 role: res.data?.profile?.role ? currentUser.role : currentUser.role
               }
             : currentUser
@@ -151,18 +152,58 @@ export default function SettingsPage() {
 
       <section className="grid gap-6 xl:grid-cols-2">
         <div className="card space-y-3">
+          <h3 className="text-lg font-bold flex items-center gap-2">
+            <Building2 className="h-5 w-5 text-blue-600" />
+            Company Information
+          </h3>
+          <p className="text-sm text-slate-600">Update your company name and it will reflect immediately across the application.</p>
+          <div className="grid gap-3 md:grid-cols-2">
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-slate-700 mb-1">Company Name</label>
+              <input className="input" placeholder="Your company name" value={settings.profile.companyName} onChange={(e) => setSettings((s) => ({ ...s, profile: { ...s.profile, companyName: e.target.value } }))} />
+              <p className="text-xs text-slate-500 mt-1">This will be displayed in the header and invoices.</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">GST Number</label>
+              <input className="input" placeholder="GST IN XXXXXXXXXXXXXX" value={settings.profile.gstNumber} onChange={(e) => setSettings((s) => ({ ...s, profile: { ...s.profile, gstNumber: e.target.value } }))} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Office Address</label>
+              <input className="input" placeholder="Your office address" value={settings.profile.officeAddress} onChange={(e) => setSettings((s) => ({ ...s, profile: { ...s.profile, officeAddress: e.target.value } }))} />
+            </div>
+          </div>
+        </div>
+
+        <div className="card space-y-3">
           <h3 className="text-lg font-bold">1. Profile Settings</h3>
           <div className="grid gap-3 md:grid-cols-2">
-            <input className="input" value={settings.profile.fullName} onChange={(e) => setSettings((s) => ({ ...s, profile: { ...s.profile, fullName: e.target.value } }))} />
-            <input className="input" value={settings.profile.email} onChange={(e) => setSettings((s) => ({ ...s, profile: { ...s.profile, email: e.target.value } }))} />
-            <input className="input" value={settings.profile.phone} onChange={(e) => setSettings((s) => ({ ...s, profile: { ...s.profile, phone: e.target.value } }))} />
-            <input className="input" value={settings.profile.companyName} onChange={(e) => setSettings((s) => ({ ...s, profile: { ...s.profile, companyName: e.target.value } }))} />
-            <input className="input" value={settings.profile.gstNumber} onChange={(e) => setSettings((s) => ({ ...s, profile: { ...s.profile, gstNumber: e.target.value } }))} />
-            <input className="input" value={settings.profile.timezone} onChange={(e) => setSettings((s) => ({ ...s, profile: { ...s.profile, timezone: e.target.value } }))} />
-            <input className="input md:col-span-2" value={settings.profile.officeAddress} onChange={(e) => setSettings((s) => ({ ...s, profile: { ...s.profile, officeAddress: e.target.value } }))} />
-            <select className="input" value={settings.profile.language} onChange={(e) => setSettings((s) => ({ ...s, profile: { ...s.profile, language: e.target.value } }))}><option>English (India)</option><option>Hindi</option></select>
-            <input className="input" placeholder="Company Logo URL (optional)" value={settings.profile.logo || ""} onChange={(e) => setSettings((s) => ({ ...s, profile: { ...s.profile, logo: e.target.value } }))} />
-            <input className="input" type="file" accept="image/*" onChange={handleLogoFileChange} />
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
+              <input className="input" placeholder="Your full name" value={settings.profile.fullName} onChange={(e) => setSettings((s) => ({ ...s, profile: { ...s.profile, fullName: e.target.value } }))} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Email Address</label>
+              <input className="input" placeholder="your@email.com" value={settings.profile.email} onChange={(e) => setSettings((s) => ({ ...s, profile: { ...s.profile, email: e.target.value } }))} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Phone Number</label>
+              <input className="input" placeholder="+91 XXXXX XXXXX" value={settings.profile.phone} onChange={(e) => setSettings((s) => ({ ...s, profile: { ...s.profile, phone: e.target.value } }))} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Timezone</label>
+              <input className="input" placeholder="Asia/Kolkata" value={settings.profile.timezone} onChange={(e) => setSettings((s) => ({ ...s, profile: { ...s.profile, timezone: e.target.value } }))} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Language</label>
+              <select className="input" value={settings.profile.language} onChange={(e) => setSettings((s) => ({ ...s, profile: { ...s.profile, language: e.target.value } }))}>
+                <option>English (India)</option>
+                <option>Hindi</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Company Logo</label>
+              <input className="input" type="file" accept="image/*" onChange={handleLogoFileChange} />
+            </div>
             {settings.profile.logo ? (
               <div className="md:col-span-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
                 <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Logo Preview</p>

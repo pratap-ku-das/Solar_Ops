@@ -2,6 +2,7 @@ import { Bell, Search, UserRound } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import Logo from "./Logo";
 
 export default function Header({ onMenuClick = () => {} }) {
   const { user, logout } = useAuth();
@@ -52,7 +53,15 @@ export default function Header({ onMenuClick = () => {} }) {
 
   return (
     <header className="mb-6 flex flex-col gap-4 rounded-2xl border border-slate-200/90 bg-white p-4 shadow-md shadow-slate-900/[0.04] ring-1 ring-slate-100 md:flex-row md:items-center md:justify-between">
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-4">
+        {user?.logo ? (
+          <div className="flex items-center justify-center rounded-xl bg-slate-50 p-2 ring-1 ring-slate-200">
+            <img src={user.logo} alt="Company logo" className="h-10 max-w-xs object-contain" />
+          </div>
+        ) : (
+          <Logo size="medium" showText={true} />
+        )}
+
         <button
           type="button"
           onClick={onMenuClick}

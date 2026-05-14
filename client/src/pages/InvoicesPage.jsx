@@ -29,6 +29,7 @@ export default function InvoicesPage() {
   const { user } = useAuth();
   const [invoices, setInvoices] = useState([]);
   const [projects, setProjects] = useState([]);
+  const [stockItems, setStockItems] = useState([]);
   const [form, setForm] = useState(initialForm);
   const [totals, setTotals] = useState({ total: 0, cgst: 0, sgst: 0, grand: 0 });
   const [editIdx, setEditIdx] = useState(null);
@@ -39,9 +40,10 @@ export default function InvoicesPage() {
 
   const fetchData = async () => {
     setLoading(true);
-    const [invoiceRes, projectRes] = await Promise.all([api.get("/invoices"), api.get("/projects")]);
+    const [invoiceRes, projectRes, stockRes] = await Promise.all([api.get("/invoices"), api.get("/projects"), api.get("/stock").catch(() => ({ data: [] }))]);
     setInvoices(Array.isArray(invoiceRes.data) ? invoiceRes.data : []);
     setProjects(Array.isArray(projectRes.data) ? projectRes.data : []);
+    setStockItems(Array.isArray(stockRes.data) ? stockRes.data : []);
     setLoading(false);
   };
 
@@ -229,6 +231,20 @@ export default function InvoicesPage() {
     setForm(prev => ({ ...prev, items: prev.items.filter((_, i) => i !== idx) }));
   };
 
+  const selectStockItem = (idx, stockItem) => {
+    setForm(prev => {
+      const items = prev.items.map((item, i) => 
+        i === idx ? { 
+          ...item, 
+          name: stockItem.itemName,
+          hsn: stockItem.category,
+          unit: stockItem.unit || "Nos"
+        } : item
+      );
+      return { ...prev, items };
+    });
+  };
+
   const exportPdf = (invoice) => {
     generateInvoicePDF(invoice);
   };
@@ -326,9 +342,27 @@ export default function InvoicesPage() {
                   const amount = (item.qty || 0) * (item.rate || 0);
                   return (
                     <tr key={idx}>
-                      <td><input className="input" value={item.name} onChange={e => handleItemChange(idx, "name", e.target.value)} required /></td>
-                      <td><input className="input" value={item.hsn} onChange={e => handleItemChange(idx, "hsn", e.target.value)} /></td>
-                      <td><input className="input" value={item.unit} onChange={e => handleItemChange(idx, "unit", e.target.value)} /></td>
+                      <td>
+                        <select className="input" value={item.name} onChange={e => {
+                          const val = e.target.value;
+                          if (val === "") {
+                            handleItemChange(idx, "name", "");
+                          } else if (val.startsWith("custom:")) {
+                            handleItemChange(idx, "name", val.slice(7));
+                          } else {
+                            const stock = stockItems.find(s => s._id === val);
+                            if (stock) selectStockItem(idx, stock);
+                          }
+                        }}>
+                          <option value="">-- Select from Stock or Enter Below --</option>
+                          {stockItems.map(stock => (
+                            <option key={stock._id} value={stock._id}>{stock.itemName} ({stock.category})</option>
+                          ))}
+                        </select>
+                        <input className="input mt-1" placeholder="Or enter item name" value={item.name} onChange={e => handleItemChange(idx, "name", e.target.value)} />
+                      </td>
+                      <td><input className="input" value={item.hsn} onChange={e => handleItemChange(idx, "hsn", e.target.value)} placeholder="HSN Code" /></td>
+                      <td><input className="input" value={item.unit} onChange={e => handleItemChange(idx, "unit", e.target.value)} placeholder="Unit" /></td>
                       <td><input className="input" type="number" min="1" value={item.qty} onChange={e => handleItemChange(idx, "qty", Number(e.target.value))} required /></td>
                       <td><input className="input" type="number" min="0" value={item.rate} onChange={e => handleItemChange(idx, "rate", Number(e.target.value))} required /></td>
                       <td><input className="input" type="number" min="0" value={item.gst} onChange={e => handleItemChange(idx, "gst", Number(e.target.value))} required /></td>

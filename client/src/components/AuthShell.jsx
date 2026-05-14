@@ -1,43 +1,117 @@
-import { CheckCircle2, Sparkles } from "lucide-react";
+import { CheckCircle2, Lock, Shield, Zap, Users, BarChart3 } from "lucide-react";
+import loginBg from "../assets/login-bg.png";
 
-export default function AuthShell({ eyebrow = "Solar PM", title, subtitle, highlights = [], children }) {
+export default function AuthShell({ eyebrow = "Solar PM", title, subtitle, highlights = [], children, rightPanelClassName = "max-w-sm" }) {
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(245,158,11,0.16),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(16,185,129,0.12),_transparent_26%),linear-gradient(180deg,_#f8fafc_0%,_#f1f5f9_100%)]">
-      <div className="grid min-h-screen lg:grid-cols-[1.08fr_0.92fr]">
-        <section className="relative hidden overflow-hidden bg-slate-950 px-10 py-12 text-white lg:flex lg:flex-col lg:justify-between">
-          <div className="absolute -left-24 top-12 h-72 w-72 rounded-full bg-amber-500/20 blur-3xl" />
-          <div className="absolute bottom-12 right-12 h-80 w-80 rounded-full bg-emerald-500/10 blur-3xl" />
+    <div className="min-h-screen bg-white">
+      <div className="grid min-h-screen lg:grid-cols-2">
+        {/* LEFT SIDE - Premium Solar Background */}
+        <section className="relative hidden lg:flex lg:flex-col lg:justify-between overflow-hidden bg-slate-900">
+          {/* High-quality solar background image with overlay */}
+          <div 
+            className="absolute inset-0 w-full h-full"
+            style={{
+              backgroundImage: `
+                linear-gradient(135deg, rgba(8, 16, 40, 0.68) 0%, rgba(8, 16, 40, 0.48) 45%, rgba(8, 16, 40, 0.72) 100%),
+                radial-gradient(circle at 30% 30%, rgba(22, 163, 74, 0.16) 0%, transparent 52%),
+                radial-gradient(circle at 70% 70%, rgba(16, 185, 129, 0.10) 0%, transparent 48%),
+                url(${loginBg})
+              `,
+              backgroundSize: 'cover, cover, cover, cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+              filter: 'saturate(1.08) contrast(1.03)'
+            }}
+          />
 
-          <div className="relative z-10 max-w-xl">
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-amber-200 ring-1 ring-white/15">
-              <Sparkles size={14} />
-              {eyebrow}
-            </div>
-            <h1 className="mt-8 text-5xl font-black leading-tight tracking-tight text-white">{title}</h1>
-            <p className="mt-5 max-w-lg text-base leading-7 text-slate-300">{subtitle}</p>
+          {/* Gradient overlays */}
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-900/42 via-slate-900/18 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-slate-900/78 via-slate-900/35 to-transparent" />
 
-            <div className="mt-10 grid gap-3 sm:grid-cols-2">
-              {highlights.map((item) => (
-                <div key={item} className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-white">
-                    <CheckCircle2 size={16} className="text-emerald-300" />
-                    {item}
-                  </div>
+          {/* Content */}
+          <div className="relative z-10 px-12 py-16 space-y-12">
+            {/* Logo & Branding */}
+            <div>
+              <div className="inline-flex items-center gap-3 mb-2">
+                <div className="flex items-center justify-center h-11 w-11 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 shadow-lg">
+                  <svg className="h-6 w-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                    <circle cx="12" cy="8" r="4" opacity="0.9"/>
+                    <path d="M12 12v8M8 16h8M6 14l-2 2M18 14l2 2" stroke="currentColor" strokeWidth="1.5" fill="none" opacity="0.9"/>
+                  </svg>
                 </div>
-              ))}
+                <div>
+                  <div className="text-2xl font-bold text-white tracking-tight">SOLAROPS</div>
+                  <div className="text-xs text-slate-400 font-semibold">Project Manager</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Main Content */}
+            <div className="max-w-2xl">
+              <p className="text-sm font-semibold text-emerald-400 mb-3 tracking-wide uppercase">Welcome back!</p>
+              <h1 className="text-5xl lg:text-6xl font-black leading-tight tracking-tight text-white mb-6">{title}</h1>
+              <p className="text-lg leading-relaxed text-slate-300">{subtitle}</p>
+            </div>
+
+            {/* Feature Highlights */}
+            <div className="space-y-3 max-w-lg">
+              <div className="flex items-start gap-3 group">
+                <div className="flex-shrink-0 h-8 w-8 rounded-lg bg-emerald-500/20 flex items-center justify-center border border-emerald-500/40 group-hover:bg-emerald-500/30 transition">
+                  <Shield className="h-4 w-4 text-emerald-400" />
+                </div>
+                <div>
+                  <p className="font-semibold text-white text-sm">Secure & Reliable</p>
+                  <p className="text-xs text-slate-400 mt-0.5">Bank-level security to protect your business and customer data.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 group">
+                <div className="flex-shrink-0 h-8 w-8 rounded-lg bg-blue-500/20 flex items-center justify-center border border-blue-500/40 group-hover:bg-blue-500/30 transition">
+                  <Zap className="h-4 w-4 text-blue-400" />
+                </div>
+                <div>
+                  <p className="font-semibold text-white text-sm">Real-time Project Access</p>
+                  <p className="text-xs text-slate-400 mt-0.5">Access your projects and teams from anywhere, anytime.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 group">
+                <div className="flex-shrink-0 h-8 w-8 rounded-lg bg-purple-500/20 flex items-center justify-center border border-purple-500/40 group-hover:bg-purple-500/30 transition">
+                  <Users className="h-4 w-4 text-purple-400" />
+                </div>
+                <div>
+                  <p className="font-semibold text-white text-sm">Team Collaboration</p>
+                  <p className="text-xs text-slate-400 mt-0.5">Work together seamlessly and get more done.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 group">
+                <div className="flex-shrink-0 h-8 w-8 rounded-lg bg-orange-500/20 flex items-center justify-center border border-orange-500/40 group-hover:bg-orange-500/30 transition">
+                  <BarChart3 className="h-4 w-4 text-orange-400" />
+                </div>
+                <div>
+                  <p className="font-semibold text-white text-sm">Reports & Insights</p>
+                  <p className="text-xs text-slate-400 mt-0.5">Track performance and make smarter business decisions.</p>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="relative z-10 max-w-lg rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-md">
-            <p className="text-sm font-semibold text-amber-200">Built for teams that want clarity.</p>
-            <p className="mt-2 text-sm leading-6 text-slate-300">
-              Manage access, track progress, reset passwords securely, and keep your solar workflow moving without switching tools.
-            </p>
+          {/* Bottom Trust Badge */}
+          <div className="relative z-10 px-12 pb-12">
+            <div className="flex items-start gap-3">
+              <CheckCircle2 className="h-5 w-5 text-emerald-400 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold text-white text-sm">Trusted by 500+ Solar Companies</p>
+                <p className="text-xs text-slate-400 mt-1">Powering efficient solar operations across India.</p>
+              </div>
+            </div>
           </div>
         </section>
 
-        <section className="flex items-center justify-center px-5 py-8 sm:px-8 lg:px-12">
-          <div className="w-full max-w-xl">{children}</div>
+        {/* RIGHT SIDE - Premium Login Form */}
+        <section className="flex items-center justify-center px-4 py-12 sm:px-6 lg:px-12 bg-gradient-to-br from-slate-50 via-white to-slate-100">
+          <div className={`w-full ${rightPanelClassName}`}>{children}</div>
         </section>
       </div>
     </div>

@@ -95,8 +95,9 @@ export default function RegisterPage() {
       title="Build your solar workspace with a clean, secure login experience."
       subtitle="Create a company account with validation, CAPTCHA protection, and a password reset flow that is ready for real users."
       highlights={highlights}
+      rightPanelClassName="max-w-2xl"
     >
-      <div className="rounded-3xl bg-white p-6 shadow-2xl ring-1 ring-slate-200 sm:p-8">
+      <div className="rounded-3xl bg-white p-6 shadow-2xl ring-1 ring-slate-200 sm:p-8 lg:p-10">
         <div className="flex items-center gap-3">
           <div className="rounded-2xl bg-brand-50 p-3 text-brand-700">
             <Sparkles size={22} />
@@ -109,14 +110,14 @@ export default function RegisterPage() {
 
         <p className="mt-3 text-sm leading-6 text-slate-500">Enter your company details to start using the dashboard.</p>
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2">
+        <form onSubmit={handleSubmit} className="mt-6 space-y-5">
+          <div className="grid gap-4 md:grid-cols-2">
             <div>
               <label className="mb-1 block text-sm font-medium text-slate-700">Full Name</label>
               <div className="relative">
                 <UserRound className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input
-                  className="input pl-10"
+                  className="input h-11 pl-10"
                   value={form.name}
                   onChange={(event) => updateField("name", event.target.value)}
                   placeholder="Your full name"
@@ -130,7 +131,7 @@ export default function RegisterPage() {
               <div className="relative">
                 <Building2 className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input
-                  className="input pl-10"
+                  className="input h-11 pl-10"
                   value={form.company}
                   onChange={(event) => updateField("company", event.target.value)}
                   placeholder="Your company"
@@ -143,18 +144,18 @@ export default function RegisterPage() {
           <div>
             <label className="mb-1 block text-sm font-medium text-slate-700">Company Address</label>
             <input
-              className="input"
+              className="input h-11"
               value={form.address}
               onChange={(event) => updateField("address", event.target.value)}
               placeholder="Street address"
             />
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-2">
             <div>
               <label className="mb-1 block text-sm font-medium text-slate-700">Phone Number</label>
               <input
-                className="input"
+                className="input h-11"
                 value={form.phone}
                 onChange={(event) => updateField("phone", event.target.value)}
                 placeholder="Company phone"
@@ -164,7 +165,7 @@ export default function RegisterPage() {
             <div>
               <label className="mb-1 block text-sm font-medium text-slate-700">GST Number</label>
               <input
-                className="input"
+                className="input h-11"
                 value={form.gstNumber}
                 onChange={(event) => updateField("gstNumber", event.target.value)}
                 placeholder="GSTIN"
@@ -175,7 +176,7 @@ export default function RegisterPage() {
           <div>
             <label className="mb-1 block text-sm font-medium text-slate-700">Email Address</label>
             <input
-              className="input"
+              className="input h-11"
               type="email"
               autoComplete="email"
               value={form.email}
@@ -188,7 +189,7 @@ export default function RegisterPage() {
           <div>
             <label className="mb-1 block text-sm font-medium text-slate-700">Password</label>
             <input
-              className="input"
+              className="input h-11"
               type="password"
               autoComplete="new-password"
               value={form.password}
@@ -208,7 +209,7 @@ export default function RegisterPage() {
           <div>
             <label className="mb-1 block text-sm font-medium text-slate-700">Confirm Password</label>
             <input
-              className="input"
+              className="input h-11"
               type="password"
               autoComplete="new-password"
               value={form.confirmPassword}
@@ -223,7 +224,7 @@ export default function RegisterPage() {
             ) : null}
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">Captcha Verification</p>
@@ -235,12 +236,12 @@ export default function RegisterPage() {
               </button>
             </div>
 
-            <div className="mt-4 flex flex-wrap items-center gap-3">
+            <div className="mt-4 flex flex-col gap-3 md:flex-row md:items-center">
               <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-4 py-3 font-mono text-lg font-bold tracking-[0.35em] text-slate-700 shadow-sm">
                 {captcha}
               </div>
               <input
-                className="input flex-1 min-w-48"
+                className="input h-11 flex-1 min-w-48"
                 value={captchaInput}
                 onChange={(event) => setCaptchaInput(event.target.value.toUpperCase())}
                 placeholder="Type captcha here"
